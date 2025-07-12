@@ -3,7 +3,7 @@ import { OAuth2Client } from 'google-auth-library';
 const googleClient = new OAuth2Client(process.env.GOOGLE_CLIENT_ID);
 
 export interface GoogleUserPayload {
-  sub: string; // Google user ID
+  sub: string;
   email: string;
   name: string;
   picture?: string;

@@ -10,7 +10,8 @@ const swaggerOptions: Options = {
     },
     servers: [
       {
-        url: 'https://creator-universe-api.onrender.com/',
+        // url: 'https://creator-universe-api.onrender.com/',
+        url: 'http://localhost:5000/',
         description: 'Development server',
       },
     ],

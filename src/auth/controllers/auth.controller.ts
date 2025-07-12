@@ -139,7 +139,12 @@ export const oauthCallback = async (
   req: Request,
   res: Response
 ): Promise<void> => {
-  const { provider, token } = req.body;
+  const { token } = req.body;
+
+  const {provider} = req.params;
+
+
+  console.log("OAuth provider:", provider);
 
   try {
     let userData;
