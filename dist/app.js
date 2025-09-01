@@ -10,7 +10,12 @@ const helmet_1 = __importDefault(require("helmet"));
 const morgan_1 = __importDefault(require("morgan"));
 const dotenv_1 = __importDefault(require("dotenv"));
 const error_middleware_1 = require("./middlewares/error.middleware");
+const category_routes_1 = __importDefault(require("./category/routes/category.routes"));
+const banner_routes_1 = __importDefault(require("./banner/routes/banner.routes"));
 const auth_routes_1 = __importDefault(require("./auth/routes/auth.routes"));
+const user_routes_1 = __importDefault(require("./user/routes/user.routes"));
+const product_routes_1 = __importDefault(require("./product/routes/product.routes"));
+const upload_routes_1 = __importDefault(require("./upload/routes/upload.routes"));
 const rateLimit_1 = require("./middlewares/rateLimit");
 const swagger_jsdoc_1 = __importDefault(require("swagger-jsdoc"));
 const swagger_ui_express_1 = __importDefault(require("swagger-ui-express"));
@@ -36,7 +41,6 @@ const connectDB = async () => {
 // Middleware
 // ========================
 app.use((0, cors_1.default)({
-    origin: process.env.FRONTEND_URL || 'http://localhost:3000',
     methods: ['GET', 'POST', 'PUT', 'DELETE'],
     allowedHeaders: ['Content-Type', 'Authorization']
 }));
@@ -45,7 +49,11 @@ app.use((0, morgan_1.default)('dev'));
 app.use(express_1.default.json());
 app.use(express_1.default.urlencoded({ extended: true }));
 const swaggerSpec = (0, swagger_jsdoc_1.default)(swagger_config_1.default);
-app.use('/api-docs', swagger_ui_express_1.default.serve, swagger_ui_express_1.default.setup(swaggerSpec));
+app.use("/api-docs", swagger_ui_express_1.default.serve, swagger_ui_express_1.default.setup(swaggerSpec, {
+    swaggerOptions: {
+        persistAuthorization: true,
+    },
+}));
 app.get('/', (req, res) => {
     res.json({
         name: 'Creator Universe API',
@@ -61,7 +69,11 @@ app.get('/', (req, res) => {
 // ========================
 app.use('/api', rateLimit_1.apiLimiter);
 app.use('/api/auth', auth_routes_1.default);
-// app.use('/api/users', userRoutes);
+app.use('/api/users', user_routes_1.default);
+app.use("/api/categories", category_routes_1.default);
+app.use("/api/banners", banner_routes_1.default);
+app.use("/api/products", product_routes_1.default);
+app.use("/api/uploads", upload_routes_1.default);
 // Health check endpoint
 app.get('/health', (req, res) => {
     res.status(200).json({ status: 'OK' });
@@ -74,7 +86,7 @@ app.use(error_middleware_1.errorHandler);
 // ========================
 // Server Startup
 // ========================
-const PORT = process.env.PORT || 5000;
+const PORT = process.env.PORT || 5050;
 const server = app.listen(PORT, () => {
     console.log(`Server running in ${process.env.NODE_ENV} mode on port ${PORT}`);
 });
