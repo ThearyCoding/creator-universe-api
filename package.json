@@ -20,7 +20,9 @@
     "@types/jsonwebtoken": "^9.0.10",
     "@types/mongoose": "^5.11.96",
     "@types/morgan": "^1.9.10",
+    "@types/multer": "^2.0.0",
     "@types/node": "^24.0.10",
+    "@types/streamifier": "^0.1.2",
     "@types/swagger-jsdoc": "^6.0.4",
     "@types/swagger-ui-express": "^4.1.8",
     "ts-node-dev": "^2.0.0",
@@ -29,6 +31,7 @@
   "dependencies": {
     "axios": "^1.10.0",
     "bcryptjs": "^3.0.2",
+    "cloudinary": "^2.7.0",
     "cookie-parser": "^1.4.7",
     "cors": "^2.8.5",
     "dotenv": "^17.0.1",
@@ -39,6 +42,8 @@
     "jsonwebtoken": "^9.0.2",
     "mongoose": "^8.16.1",
     "morgan": "^1.10.0",
+    "multer": "^2.0.2",
+    "streamifier": "^0.1.1",
     "swagger-jsdoc": "^6.2.8",
     "swagger-ui-express": "^5.0.1"
   }

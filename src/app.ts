@@ -5,7 +5,12 @@ import helmet from 'helmet';
 import morgan from 'morgan';
 import dotenv from 'dotenv';
 import { errorHandler, notFound } from './middlewares/error.middleware';
+import categoryRoutes from "./category/routes/category.routes";
+import bannerRoutes from "./banner/routes/banner.routes";
 import authRoutes from './auth/routes/auth.routes';
+import userRoutes from './user/routes/user.routes';
+import productRoutes from "./product/routes/product.routes";
+import uploadRoutes from "./upload/routes/upload.routes";
 import { apiLimiter } from './middlewares/rateLimit';
 import swaggerJsdoc from 'swagger-jsdoc';
 import swaggerUi from 'swagger-ui-express';
@@ -42,7 +47,16 @@ app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 
 const swaggerSpec = swaggerJsdoc(swaggerOptions);
-app.use('/api-docs', swaggerUi.serve, swaggerUi.setup(swaggerSpec));
+app.use(
+  "/api-docs",
+  swaggerUi.serve,
+  swaggerUi.setup(swaggerSpec, {
+    swaggerOptions: {
+      persistAuthorization: true,
+    },
+  })
+);
+
 app.get('/', (req, res) => {
   res.json({
     name: 'Creator Universe API',
@@ -59,7 +73,11 @@ app.get('/', (req, res) => {
 // ========================
 app.use('/api', apiLimiter);
 app.use('/api/auth', authRoutes);
-// app.use('/api/users', userRoutes);
+app.use('/api/users', userRoutes);
+app.use("/api/categories", categoryRoutes);
+app.use("/api/banners", bannerRoutes);
+app.use("/api/products", productRoutes);
+app.use("/api/uploads", uploadRoutes);
 
 // Health check endpoint
 app.get('/health', (req, res) => {
@@ -75,7 +93,8 @@ app.use(errorHandler);
 // ========================
 // Server Startup
 // ========================
-const PORT = process.env.PORT || 5000;
+
+const PORT = process.env.PORT || 5050;
 const server = app.listen(PORT, () => {
   console.log(`Server running in ${process.env.NODE_ENV} mode on port ${PORT}`);
 });

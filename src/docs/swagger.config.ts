@@ -10,8 +10,8 @@ const swaggerOptions: Options = {
     },
     servers: [
       {
-        url: 'https://creator-universe-api.onrender.com/',
-        //url: 'http://localhost:5000/',
+        // url: 'https://creator-universe-api.onrender.com/',
+        url: 'http://localhost:5050/',
         description: 'Development server',
       },
     ],
@@ -27,7 +27,20 @@ const swaggerOptions: Options = {
     security: [{ bearerAuth: [] }],
   },
 
-  apis: ['./src/auth/routes/**/*.ts', './src/auth/controllers/**/*.ts'],
+apis: [
+  "./src/auth/routes/**/*.ts",
+  "./src/auth/controllers/**/*.ts",
+  "./src/user/routes/**/*.ts",
+  "./src/user/controllers/**/*.ts",
+  "./src/category/routes/**/*.ts",
+  "./src/category/controllers/**/*.ts",
+  "./src/banner/routes/**/*.ts",
+  "./src/banner/controllers/**/*.ts",
+  "./src/product/routes/**/*.ts",
+  "./src/product/controllers/**/*.ts",
+    "./src/upload/routes/**/*.ts",
+  "./src/upload/controllers/**/*.ts",
+],
 };
 
 
