@@ -1,17 +1,18 @@
 import { Options } from 'swagger-jsdoc';
-
+import dotenv from "dotenv";
+dotenv.config();
 const swaggerOptions: Options = {
   definition: {
     openapi: '3.0.0',
     info: {
       title: 'Creator Universe API',
-      version: '1.0.0',
+      version: '1.0.2',
       description: 'API documentation for Creator Universe backend',
     },
     servers: [
       {
-        // url: 'https://creator-universe-api.onrender.com/',
-        url: 'http://localhost:5050/',
+       
+        url: process.env.BASE_URL,
         description: 'Development server',
       },
     ],
@@ -38,7 +39,7 @@ apis: [
   "./src/banner/controllers/**/*.ts",
   "./src/product/routes/**/*.ts",
   "./src/product/controllers/**/*.ts",
-    "./src/upload/routes/**/*.ts",
+  "./src/upload/routes/**/*.ts",
   "./src/upload/controllers/**/*.ts",
 ],
 };
