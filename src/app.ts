@@ -15,6 +15,7 @@ import { apiLimiter } from './middlewares/rateLimit';
 import swaggerJsdoc from 'swagger-jsdoc';
 import swaggerUi from 'swagger-ui-express';
 import swaggerOptions from './docs/swagger.config';
+import { User } from './user/models/user.model';
 // Load environment variables
 dotenv.config();
 
@@ -56,7 +57,6 @@ app.use(
     },
   })
 );
-
 app.get('/', (req, res) => {
   res.json({
     name: 'Creator Universe API',

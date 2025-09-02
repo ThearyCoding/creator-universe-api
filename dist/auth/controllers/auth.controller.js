@@ -116,7 +116,9 @@ const confirmOTP = async (req, res) => {
 };
 exports.confirmOTP = confirmOTP;
 const oauthCallback = async (req, res) => {
-    const { provider, token } = req.body;
+    const { token } = req.body;
+    const { provider } = req.params;
+    console.log("OAuth provider:", provider);
     try {
         let userData;
         if (provider === "google") {

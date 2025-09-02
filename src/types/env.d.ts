@@ -19,6 +19,8 @@ declare namespace NodeJS {
     
     // Frontend
     FRONTEND_URL: string;
+
+    BASE_URL: string;
     
     // Add other variables as needed
   }
