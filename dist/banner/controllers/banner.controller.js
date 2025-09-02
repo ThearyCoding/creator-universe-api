@@ -27,11 +27,11 @@ class BannerController {
                     startDate: startDate ? new Date(startDate) : undefined,
                     endDate: endDate ? new Date(endDate) : undefined,
                 });
-                res.status(201).json(banner);
+                return res.status(201).json(banner);
             }
             catch (err) {
                 console.error("Create banner error:", err);
-                res.status(500).json({ message: "Failed to create banner" });
+                return res.status(500).json({ message: "Failed to create banner" });
             }
         };
         /**
@@ -79,7 +79,7 @@ class BannerController {
                         .limit(limit),
                     banner_model_1.Banner.countDocuments(filter),
                 ]);
-                res.json({
+                return res.json({
                     items,
                     page,
                     limit,
@@ -89,7 +89,7 @@ class BannerController {
             }
             catch (err) {
                 console.error("List banners error:", err);
-                res.status(500).json({ message: "Failed to list banners" });
+                return res.status(500).json({ message: "Failed to list banners" });
             }
         };
         /**
@@ -102,11 +102,11 @@ class BannerController {
                 if (!banner) {
                     return res.status(404).json({ message: "Banner not found" });
                 }
-                res.json(banner);
+                return res.json(banner);
             }
             catch (err) {
                 console.error("Get banner error:", err);
-                res.status(500).json({ message: "Failed to fetch banner" });
+                return res.status(500).json({ message: "Failed to fetch banner" });
             }
         };
         /**
@@ -141,11 +141,11 @@ class BannerController {
                     banner.endDate = endDate ? new Date(endDate) : undefined;
                 }
                 await banner.save();
-                res.json(banner);
+                return res.json(banner);
             }
             catch (err) {
                 console.error("Update banner error:", err);
-                res.status(500).json({ message: "Failed to update banner" });
+                return res.status(500).json({ message: "Failed to update banner" });
             }
         };
         /**
@@ -158,11 +158,11 @@ class BannerController {
                 if (result.deletedCount === 0) {
                     return res.status(404).json({ message: "Banner not found" });
                 }
-                res.json({ message: "Banner deleted successfully" });
+                return res.json({ message: "Banner deleted successfully" });
             }
             catch (err) {
                 console.error("Delete banner error:", err);
-                res.status(500).json({ message: "Failed to delete banner" });
+                return res.status(500).json({ message: "Failed to delete banner" });
             }
         };
     }

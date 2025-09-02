@@ -8,12 +8,13 @@ export class CategoryController {
             const { name, description, isActive, imageUrl } = req.body;
             if (!name?.trim()) return res.status(400).json({ message: "Name is required" });
 
-            const category = await Category.create({
+            const category = new Category({
                 name: name.trim(),
                 description,
                 isActive: isActive ?? true,
                 imageUrl,
             });
+            await category.save();
 
             return res.status(201).json(category);
         } catch (err: any) {

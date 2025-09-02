@@ -102,7 +102,7 @@ router.post("/", auth_1.authenticate, (0, authorizeRoles_1.authorizeRoles)("admi
  * @swagger
  * /api/banners:
  *   get:
- *     summary: List banners (public)
+
  *     tags: [Banners]
  *     parameters:
  *       - in: query
@@ -129,7 +129,9 @@ router.post("/", auth_1.authenticate, (0, authorizeRoles_1.authorizeRoles)("admi
  *             schema:
  *               $ref: '#/components/schemas/PaginatedBanners'
  */
-router.get("/", (0, asyncHandler_1.asyncHandler)(controller.list));
+router.get("/", (0, asyncHandler_1.asyncHandler)(async (req, res) => {
+    await controller.list(req, res);
+}));
 /**
  * @swagger
  * /api/banners/{id}:
