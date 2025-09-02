@@ -3,12 +3,11 @@ import { Category } from "../models/category.model";
 
 export class CategoryController {
     // Admin: Create
-    async create(req: Request, res: Response) {
+   async create(req: Request, res: Response) {
     try {
         const { name, description, isActive, imageUrl } = req.body;
         if (!name?.trim()) return res.status(400).json({ message: "Name is required" });
 
-        // Step 1: Create a new Category object in memory
         const category = new Category({
             name: name.trim(),
             description,
@@ -16,7 +15,6 @@ export class CategoryController {
             imageUrl,
         });
         
-        // Step 2: Save it to the database (this is the only save)
         await category.save();
 
         return res.status(201).json(category);
