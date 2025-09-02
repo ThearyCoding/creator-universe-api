@@ -1,12 +1,12 @@
-import { Router } from "express";
-import { authenticate } from "../../middlewares/auth";
-import { authorizeRoles } from "../../middlewares/authorizeRoles";
-import { BannerController } from "../controllers/banner.controller";
-import { asyncHandler } from "../../utils/asyncHandler";
-
-const router = Router();
-const controller = new BannerController();
-
+"use strict";
+Object.defineProperty(exports, "__esModule", { value: true });
+const express_1 = require("express");
+const auth_1 = require("../../middlewares/auth");
+const authorizeRoles_1 = require("../../middlewares/authorizeRoles");
+const banner_controller_1 = require("../controllers/banner.controller");
+const asyncHandler_1 = require("../../utils/asyncHandler");
+const router = (0, express_1.Router)();
+const controller = new banner_controller_1.BannerController();
 /**
  * @swagger
  * tags:
@@ -67,7 +67,6 @@ const controller = new BannerController();
  *         total: { type: integer, example: 12 }
  *         pages: { type: integer, example: 2 }
  */
-
 /**
  * @swagger
  * /api/banners:
@@ -96,10 +95,9 @@ const controller = new BannerController();
  *       403:
  *         description: Forbidden
  */
-router.post("/", authenticate, authorizeRoles("admin"), asyncHandler(async (req, res) => {
+router.post("/", auth_1.authenticate, (0, authorizeRoles_1.authorizeRoles)("admin"), (0, asyncHandler_1.asyncHandler)(async (req, res) => {
     await controller.create(req, res);
 }));
-
 /**
  * @swagger
  * /api/banners:
@@ -131,10 +129,9 @@ router.post("/", authenticate, authorizeRoles("admin"), asyncHandler(async (req,
  *             schema:
  *               $ref: '#/components/schemas/PaginatedBanners'
  */
-router.get("/", asyncHandler(async (req, res) => {
+router.get("/", (0, asyncHandler_1.asyncHandler)(async (req, res) => {
     await controller.list(req, res);
 }));
-
 /**
  * @swagger
  * /api/banners/{id}:
@@ -156,10 +153,9 @@ router.get("/", asyncHandler(async (req, res) => {
  *       404:
  *         description: Not found
  */
-router.get("/:id", asyncHandler(async (req, res) => {
+router.get("/:id", (0, asyncHandler_1.asyncHandler)(async (req, res) => {
     await controller.getOne(req, res);
 }));
-
 /**
  * @swagger
  * /api/banners/{id}:
@@ -193,10 +189,9 @@ router.get("/:id", asyncHandler(async (req, res) => {
  *       404:
  *         description: Not found
  */
-router.patch("/:id", authenticate, authorizeRoles("admin"), asyncHandler(async (req, res) => {
+router.patch("/:id", auth_1.authenticate, (0, authorizeRoles_1.authorizeRoles)("admin"), (0, asyncHandler_1.asyncHandler)(async (req, res) => {
     await controller.update(req, res);
 }));
-
 /**
  * @swagger
  * /api/banners/{id}:
@@ -220,8 +215,7 @@ router.patch("/:id", authenticate, authorizeRoles("admin"), asyncHandler(async (
  *       404:
  *         description: Not found
  */
-router.delete("/:id", authenticate, authorizeRoles("admin"), asyncHandler(async (req, res) => {
+router.delete("/:id", auth_1.authenticate, (0, authorizeRoles_1.authorizeRoles)("admin"), (0, asyncHandler_1.asyncHandler)(async (req, res) => {
     await controller.remove(req, res);
 }));
-
-export default router;
+exports.default = router;
