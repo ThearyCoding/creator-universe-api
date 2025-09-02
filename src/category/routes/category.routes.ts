@@ -210,4 +210,14 @@ router.delete("/:idOrSlug", authenticate, authorizeRoles("admin"), asyncHandler(
     await controller.remove(req, res);
 }));
 
+
+
+router.patch("/:id/status",
+  authenticate,
+  authorizeRoles("admin"),
+  asyncHandler(async (req,res) => {
+    await controller.updateStatus(req,res);
+  })
+);
+
 export default router;
