@@ -31,13 +31,14 @@ const categorySchema = new Schema<ICategory>(
 );
 
 categorySchema.pre<ICategory>("save", function (next) {
-  if (this.isModified("name")) {
+  // This runs if the document is NEW or if the NAME field has been changed.
+  if (this.isNew || this.isModified("name")) {
     this.slug = this.name
       .toLowerCase()
+      .trim()
       .replace(/[^a-z0-9]+/g, "-")
       .replace(/(^-|-$)+/g, "");
   }
   next();
 });
-
 export const Category = model<ICategory>("Category", categorySchema);
