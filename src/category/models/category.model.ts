@@ -1,3 +1,4 @@
+// models/category.ts
 import { Schema, model, Document } from "mongoose";
 
 export interface ICategory extends Document {
@@ -33,11 +34,18 @@ const categorySchema = new Schema<ICategory>(
   { timestamps: true }
 );
 
+// Auto-slug
 categorySchema.pre<ICategory>("validate", function (next) {
   if ((this.isModified("name") || !this.slug) && this.name) {
     this.slug = slugify(this.name);
   }
   next();
 });
+
+// Helpful indexes for pagination/filter/sort
+categorySchema.index({ createdAt: -1 });               // default sort
+categorySchema.index({ name: 1 }, { unique: true });
+categorySchema.index({ isActive: 1, createdAt: -1 });
+categorySchema.index({ name: "text", description: "text" }); // search
 
 export const Category = model<ICategory>("Category", categorySchema);
