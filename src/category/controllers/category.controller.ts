@@ -24,7 +24,7 @@ export class CategoryController {
         }
     };
 
-    // Public: List
+    // Public: Lis
     async list(req: Request, res: Response) {
         try {
             const page = Math.max(parseInt(String(req.query.page ?? "1"), 10), 1);
