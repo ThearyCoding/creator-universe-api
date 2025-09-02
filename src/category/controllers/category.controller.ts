@@ -4,25 +4,28 @@ import { Category } from "../models/category.model";
 export class CategoryController {
     // Admin: Create
     async create(req: Request, res: Response) {
-        try {
-            const { name, description, isActive, imageUrl } = req.body;
-            if (!name?.trim()) return res.status(400).json({ message: "Name is required" });
+    try {
+        const { name, description, isActive, imageUrl } = req.body;
+        if (!name?.trim()) return res.status(400).json({ message: "Name is required" });
 
-            const category = await Category.create({
-                name: name.trim(),
-                description,
-                isActive: isActive ?? true,
-                imageUrl,
-            });
-            await category.save();
+        // Step 1: Create a new Category object in memory
+        const category = new Category({
+            name: name.trim(),
+            description,
+            isActive: isActive ?? true,
+            imageUrl,
+        });
+        
+        // Step 2: Save it to the database (this is the only save)
+        await category.save();
 
-            return res.status(201).json(category);
-        } catch (err: any) {
-            if (err?.code === 11000) return res.status(409).json({ message: "Category already exists" });
-            console.error("Create category error:", err);
-            return res.status(500).json({ message: "Failed to create category" });
-        }
-    };
+        return res.status(201).json(category);
+    } catch (err: any) {
+        if (err?.code === 11000) return res.status(409).json({ message: "Category already exists" });
+        console.error("Create category error:", err);
+        return res.status(500).json({ message: "Failed to create category" });
+    }
+}
 
     // Public: List
     async list(req: Request, res: Response) {
