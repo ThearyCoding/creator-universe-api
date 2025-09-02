@@ -3,7 +3,9 @@ import { Category } from "../models/category.model";
 
 export class CategoryController {
     // Admin: Create
-   async create(req: Request, res: Response) {
+   // Admin: Create
+async create(req: Request, res: Response) {
+    console.log("--- RUNNING THE LATEST CODE AS OF 2:10 PM ---"); // <-- ADD THIS LINE
     try {
         const { name, description, isActive, imageUrl } = req.body;
         if (!name?.trim()) return res.status(400).json({ message: "Name is required" });
