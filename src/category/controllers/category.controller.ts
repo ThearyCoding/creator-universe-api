@@ -38,7 +38,7 @@ export class CategoryController {
    */
     async updateStatus(req: Request, res: Response) {
         try {
-            const { id } = req.params;
+            const { id } = req.body;
 
             if (!mongoose.isValidObjectId(id)) {
                 return res.status(400).json({ message: "Invalid category id" });

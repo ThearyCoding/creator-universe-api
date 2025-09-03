@@ -212,12 +212,7 @@ router.delete("/:idOrSlug", authenticate, authorizeRoles("admin"), asyncHandler(
 
 
 
-router.patch("/:id/status",
-  authenticate,
-  authorizeRoles("admin"),
-  asyncHandler(async (req,res) => {
-    await controller.updateStatus(req,res);
-  })
-);
-
+router.post("/status", authenticate, authorizeRoles("admin"), asyncHandler(async (req,res) =>{
+  await controller.updateStatus(req,res); // <-- never reached
+}));
 export default router;
