@@ -15,6 +15,7 @@ class CategoryController {
                 isActive: isActive ?? true,
                 imageUrl,
             });
+            await category.save();
             return res.status(201).json(category);
         }
         catch (err) {
@@ -25,7 +26,7 @@ class CategoryController {
         }
     }
     ;
-    // Public: List
+    // Public: Lis
     async list(req, res) {
         try {
             const page = Math.max(parseInt(String(req.query.page ?? "1"), 10), 1);
