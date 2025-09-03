@@ -40,35 +40,9 @@ const connectDB = async () => {
 // Middleware
 // ========================
 
-// ✅ Enhanced CORS configuration
-const corsOptions = {
-  origin: function (origin: string | undefined, callback: (error: Error | null, allow?: boolean) => void) {
-    // Allow requests with no origin (like mobile apps, Postman)
-    if (!origin) return callback(null, true);
-    
-    // List of allowed origins
-    const allowedOrigins = [
-      'http://localhost:3000',
-      'http://127.0.0.1:3000',
-      'http://localhost:8080',
-      'http://127.0.0.1:8080',
-      'http://localhost:5000',
-      'http://127.0.0.1:5000',
-      // Add your Flutter web deployment URLs here
-      // 'https://your-flutter-app.vercel.app',
-    ];
-
-    if (allowedOrigins.includes(origin) || origin.includes('localhost')) {
-      return callback(null, true);
-    }
-
-    // For development, allow all origins
-    if (process.env.NODE_ENV === 'development') {
-      return callback(null, true);
-    }
-
-    callback(new Error('Not allowed by CORS'));
-  },
+// ✅ Simple CORS configuration that allows all origins for development
+app.use(cors({
+  origin: true, // Allow all origins
   credentials: true,
   methods: ['GET', 'POST', 'PUT', 'DELETE', 'PATCH', 'OPTIONS'],
   allowedHeaders: [
@@ -79,15 +53,11 @@ const corsOptions = {
     'Authorization',
     'Cache-Control',
     'Pragma'
-  ],
-  preflightContinue: false,
-  optionsSuccessStatus: 204
-};
-
-app.use(cors(corsOptions));
+  ]
+}));
 
 // ✅ Handle preflight requests
-app.options('*', cors(corsOptions));
+app.options('*', cors());
 
 // ✅ Helmet configuration (allow images from your domain)
 app.use(helmet({
