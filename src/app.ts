@@ -4,7 +4,6 @@ import cors from 'cors';
 import helmet from 'helmet';
 import morgan from 'morgan';
 import dotenv from 'dotenv';
-import path from 'path'; // Add this import
 import { errorHandler, notFound } from './middlewares/error.middleware';
 import categoryRoutes from "./category/routes/category.routes";
 import bannerRoutes from "./banner/routes/banner.routes";
@@ -16,7 +15,6 @@ import { apiLimiter } from './middlewares/rateLimit';
 import swaggerJsdoc from 'swagger-jsdoc';
 import swaggerUi from 'swagger-ui-express';
 import swaggerOptions from './docs/swagger.config';
-
 // Load environment variables
 dotenv.config();
 
@@ -39,46 +37,17 @@ const connectDB = async () => {
 // ========================
 // Middleware
 // ========================
-
-// ✅ Simple CORS configuration that allows all origins for development
 app.use(cors({
-  origin: true, // Allow all origins
-  credentials: true,
-  methods: ['GET', 'POST', 'PUT', 'DELETE', 'PATCH', 'OPTIONS'],
-  allowedHeaders: [
-    'Origin',
-    'X-Requested-With',
-    'Content-Type',
-    'Accept',
-    'Authorization',
-    'Cache-Control',
-    'Pragma'
-  ]
+  origin: '*',
+
+  methods: ['GET', 'POST', 'PUT', 'DELETE'],
+  allowedHeaders: ['Content-Type', 'Authorization']
 }));
-
-// ✅ Handle preflight requests
-app.options('*', cors());
-
-// ✅ Helmet configuration (allow images from your domain)
-app.use(helmet({
-  crossOriginResourcePolicy: { policy: "cross-origin" },
-  contentSecurityPolicy: {
-    directives: {
-      defaultSrc: ["'self'"],
-      imgSrc: ["'self'", "data:", "*"], // Allow images from anywhere
-      connectSrc: ["'self'", "*"] // Allow API connections
-    },
-  },
-}));
-
+app.use(helmet());
 app.use(morgan('dev'));
-app.use(express.json({ limit: '10mb' })); // Increase limit for image uploads
-app.use(express.urlencoded({ extended: true, limit: '10mb' }));
+app.use(express.json());
+app.use(express.urlencoded({ extended: true }));
 
-// ✅ Serve static files (IMPORTANT: Add this for image serving)
-app.use('/uploads', express.static(path.join(__dirname, '../uploads')));
-
-// Swagger setup
 const swaggerSpec = swaggerJsdoc(swaggerOptions);
 app.use(
   "/api-docs",
@@ -90,7 +59,6 @@ app.use(
   })
 );
 
-// Root endpoint with CORS info
 app.get('/', (req, res) => {
   res.json({
     name: 'Creator Universe API',
@@ -98,9 +66,7 @@ app.get('/', (req, res) => {
     status: 'OK',
     uptime: process.uptime().toFixed(2) + 's',
     environment: process.env.NODE_ENV || 'development',
-    docs: `${req.protocol}://${req.get('host')}/api-docs`,
-    cors: 'enabled',
-    staticFiles: '/uploads for image serving'
+    docs: `${req.protocol}://${req.get('host')}/api-docs`
   });
 });
 
@@ -117,16 +83,7 @@ app.use("/api/uploads", uploadRoutes);
 
 // Health check endpoint
 app.get('/health', (req, res) => {
-  res.status(200).json({ status: 'OK', timestamp: new Date().toISOString() });
-});
-
-// ✅ Test CORS endpoint
-app.get('/api/test-cors', (req, res) => {
-  res.json({
-    message: 'CORS is working!',
-    origin: req.get('Origin'),
-    timestamp: new Date().toISOString()
-  });
+  res.status(200).json({ status: 'OK' });
 });
 
 // ========================
@@ -142,8 +99,6 @@ app.use(errorHandler);
 const PORT = process.env.PORT || 5050;
 const server = app.listen(PORT, () => {
   console.log(`Server running in ${process.env.NODE_ENV} mode on port ${PORT}`);
-  console.log(`API Documentation: http://localhost:${PORT}/api-docs`);
-  console.log(`CORS enabled for development origins`);
 });
 
 // Handle unhandled promise rejections
