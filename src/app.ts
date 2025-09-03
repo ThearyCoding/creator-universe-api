@@ -62,7 +62,7 @@ app.use(
 app.get('/', (req, res) => {
   res.json({
     name: 'Creator Universe API',
-    version: '1.0.0',
+    version: '1.0.1-corsfix',
     status: 'OK',
     uptime: process.uptime().toFixed(2) + 's',
     environment: process.env.NODE_ENV || 'development',
