@@ -14,6 +14,12 @@ const controller = new BannerController();
  *   description: Promotional banners management
  *
  * components:
+ *   securitySchemes:
+ *     bearerAuth:
+ *       type: http
+ *       scheme: bearer
+ *       bearerFormat: JWT
+ *
  *   schemas:
  *     Banner:
  *       type: object
@@ -30,6 +36,7 @@ const controller = new BannerController();
  *         endDate: { type: string, format: date-time, example: "2025-06-30T23:59:59.000Z" }
  *         createdAt: { type: string, format: date-time }
  *         updatedAt: { type: string, format: date-time }
+ *
  *     BannerCreate:
  *       type: object
  *       required: [title, imageUrl]
@@ -43,6 +50,7 @@ const controller = new BannerController();
  *         isActive: { type: boolean, example: true }
  *         startDate: { type: string, format: date-time }
  *         endDate: { type: string, format: date-time }
+ *
  *     BannerUpdate:
  *       type: object
  *       properties:
@@ -55,17 +63,36 @@ const controller = new BannerController();
  *         isActive: { type: boolean }
  *         startDate: { type: string, format: date-time }
  *         endDate: { type: string, format: date-time }
- *     PaginatedBanners:
+ *
+ *     BannersMeta:
+ *       type: object
+ *       properties:
+ *         page: { type: integer, example: 1 }
+ *         limit: { type: integer, example: 10 }
+ *         total: { type: integer, example: 12 }
+ *         pages: { type: integer, example: 2 }
+ *         sortBy:
+ *           type: string
+ *           example: position
+ *           enum: [position, createdAt, title, isActive, startDate, endDate]
+ *         order:
+ *           type: string
+ *           example: asc
+ *           enum: [asc, desc]
+ *         hasPrev: { type: boolean, example: false }
+ *         hasNext: { type: boolean, example: true }
+ *         prevPage: { type: integer, nullable: true, example: null }
+ *         nextPage: { type: integer, nullable: true, example: 2 }
+ *
+ *     PaginatedBannersResponse:
  *       type: object
  *       properties:
  *         items:
  *           type: array
  *           items:
  *             $ref: '#/components/schemas/Banner'
- *         page: { type: integer, example: 1 }
- *         limit: { type: integer, example: 10 }
- *         total: { type: integer, example: 12 }
- *         pages: { type: integer, example: 2 }
+ *         meta:
+ *           $ref: '#/components/schemas/BannersMeta'
  */
 
 /**
@@ -97,7 +124,7 @@ const controller = new BannerController();
  *         description: Forbidden
  */
 router.post("/", authenticate, authorizeRoles("admin"), asyncHandler(async (req, res) => {
-    await controller.create(req, res);
+  await controller.create(req, res);
 }));
 
 /**
@@ -109,29 +136,47 @@ router.post("/", authenticate, authorizeRoles("admin"), asyncHandler(async (req,
  *     parameters:
  *       - in: query
  *         name: page
- *         schema: { type: integer, example: 1 }
+ *         schema: { type: integer, minimum: 1, example: 1 }
  *       - in: query
  *         name: limit
- *         schema: { type: integer, example: 10 }
+ *         schema: { type: integer, minimum: 1, maximum: 100, example: 10 }
  *       - in: query
  *         name: search
  *         schema: { type: string, example: "sale" }
+ *         description: Case-insensitive search across title, subtitle, and description.
  *       - in: query
  *         name: isActive
  *         schema: { type: boolean, example: true }
+ *         description: Filter by isActive flag.
  *       - in: query
  *         name: nowOnly
  *         schema: { type: boolean, example: true }
- *         description: If true, returns only banners active right now (isActive=true and within start/end dates)
+ *         description: If true, returns only banners active right now (isActive=true and within start/end dates).
+ *       - in: query
+ *         name: sortBy
+ *         schema:
+ *           type: string
+ *           enum: [position, createdAt, title, isActive, startDate, endDate]
+ *           example: position
+ *         description: Field to sort by. Defaults to position.
+ *       - in: query
+ *         name: order
+ *         schema:
+ *           type: string
+ *           enum: [asc, desc]
+ *           example: asc
+ *         description: Sort order. Defaults to asc for position, otherwise desc.
  *     responses:
  *       200:
  *         description: Paginated banners
  *         content:
  *           application/json:
  *             schema:
- *               $ref: '#/components/schemas/PaginatedBanners'
+ *               $ref: '#/components/schemas/PaginatedBannersResponse'
  */
-router.get("/", asyncHandler(controller.list));
+router.get("/", asyncHandler(async (req, res) => {
+  await controller.list(req, res);
+}));
 
 /**
  * @swagger
@@ -155,7 +200,7 @@ router.get("/", asyncHandler(controller.list));
  *         description: Not found
  */
 router.get("/:id", asyncHandler(async (req, res) => {
-    await controller.getOne(req, res);
+  await controller.getOne(req, res);
 }));
 
 /**
@@ -192,7 +237,7 @@ router.get("/:id", asyncHandler(async (req, res) => {
  *         description: Not found
  */
 router.patch("/:id", authenticate, authorizeRoles("admin"), asyncHandler(async (req, res) => {
-    await controller.update(req, res);
+  await controller.update(req, res);
 }));
 
 /**
@@ -219,7 +264,8 @@ router.patch("/:id", authenticate, authorizeRoles("admin"), asyncHandler(async (
  *         description: Not found
  */
 router.delete("/:id", authenticate, authorizeRoles("admin"), asyncHandler(async (req, res) => {
-    await controller.remove(req, res);
+  await controller.remove(req, res);
 }));
+
 
 export default router;

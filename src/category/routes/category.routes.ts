@@ -146,15 +146,15 @@ router.get("/:idOrSlug", asyncHandler(async (req, res) => {
 
 /**
  * @swagger
- * /api/categories/{idOrSlug}:
- *   patch:
+ * /api/categories/{id}:
+ *   put:
  *     summary: Update a category (admin only)
  *     tags: [Categories]
  *     security:
  *       - bearerAuth: []
  *     parameters:
  *       - in: path
- *         name: idOrSlug
+ *         name: id
  *         required: true
  *         schema: { type: string }
  *     requestBody:
@@ -179,7 +179,7 @@ router.get("/:idOrSlug", asyncHandler(async (req, res) => {
  *       409:
  *         description: Duplicate name or slug
  */
-router.patch("/:idOrSlug", authenticate, authorizeRoles("admin"), asyncHandler(async (req,res) => {
+router.put("/:id", authenticate, authorizeRoles("admin"), asyncHandler(async (req,res) => {
     await controller.update(req, res);
 }));
 

@@ -152,11 +152,10 @@ export class CategoryController {
     // Admin: Update
     async update(req: Request, res: Response) {
         try {
-            const { idOrSlug } = req.params;
+            const { id } = req.params;
             const { name, description, isActive, slug, imageUrl } = req.body;
 
-            const query = idOrSlug.match(/^[a-f\d]{24}$/i) ? { _id: idOrSlug } : { slug: idOrSlug.toLowerCase() };
-            const category = await Category.findOne(query).select("+slug");
+            const category = await Category.findOne({_id: id});
             if (!category) return res.status(404).json({ message: "Category not found" });
 
             if (typeof name !== "undefined") category.name = String(name).trim();

@@ -38,10 +38,10 @@ export class BannerController {
         endDate: endDate ? new Date(endDate) : undefined,
       });
 
-    return  res.status(201).json(banner);
+      return res.status(201).json(banner);
     } catch (err) {
       console.error("Create banner error:", err);
-    return  res.status(500).json({ message: "Failed to create banner" });
+      return res.status(500).json({ message: "Failed to create banner" });
     }
   };
 
@@ -49,9 +49,11 @@ export class BannerController {
    * GET /api/banners (public)
    * Query:
    *   page=1&limit=10
-   *   search=keyword (matches title/description)
+   *   search=keyword (matches title/subtitle/description)
    *   isActive=true|false
-   *   nowOnly=true (only banners currently within start/end window AND isActive)
+   *   nowOnly=true (only banners active *now*: isActive && start<=now && end>=now)
+   *   sortBy=position|createdAt|title|isActive|startDate|endDate
+   *   order=asc|desc
    */
   list = async (req: Request, res: Response) => {
     try {
@@ -61,11 +63,30 @@ export class BannerController {
       const isActiveQ = req.query.isActive;
       const nowOnly = String(req.query.nowOnly ?? "").toLowerCase() === "true";
 
+      // safe sorting (defaults)
+      const SAFE_SORT_FIELDS = new Set([
+        "position",
+        "createdAt",
+        "title",
+        "isActive",
+        "startDate",
+        "endDate",
+      ]);
+      const sortByRaw = String(req.query.sortBy ?? "position");
+      const sortBy = SAFE_SORT_FIELDS.has(sortByRaw) ? sortByRaw : "position";
+      const orderRaw = String(req.query.order ?? (sortBy === "position" ? "asc" : "desc")).toLowerCase();
+      const order: 1 | -1 = orderRaw === "asc" ? 1 : -1;
+      const sort: Record<string, 1 | -1> = { [sortBy]: order, ...(sortBy !== "createdAt" ? { createdAt: -1 } : {}) };
+
+      // filters
       const filter: Record<string, any> = {};
 
       if (search) {
+        // If you have a text index on title/subtitle/description, consider using {$text: {$search: search}}
+        // Here we keep it index-agnostic with regex:
         filter.$or = [
           { title: { $regex: search, $options: "i" } },
+          { subtitle: { $regex: search, $options: "i" } },
           { description: { $regex: search, $options: "i" } },
         ];
       }
@@ -78,7 +99,7 @@ export class BannerController {
 
       if (nowOnly) {
         const now = new Date();
-        // only banners that are active AND (startDate <= now OR undefined) AND (endDate >= now OR undefined)
+        // enforce isActive=true and the date window
         filter.isActive = true;
         filter.$and = [
           { $or: [{ startDate: { $lte: now } }, { startDate: { $exists: false } }, { startDate: null }] },
@@ -88,24 +109,38 @@ export class BannerController {
 
       const [items, total] = await Promise.all([
         Banner.find(filter)
-          .sort({ position: 1, createdAt: -1 })
+          .sort(sort)
           .skip((page - 1) * limit)
-          .limit(limit),
+          .limit(limit)
+          .lean(),
         Banner.countDocuments(filter),
       ]);
 
-      res.json({
+      const pages = Math.max(Math.ceil(total / limit), 1);
+      const hasPrev = page > 1;
+      const hasNext = page < pages;
+
+      return res.json({
         items,
-        page,
-        limit,
-        total,
-        pages: Math.ceil(total / limit),
+        meta: {
+          page,
+          limit,
+          total,
+          pages,
+          sortBy,
+          order: order === 1 ? "asc" : "desc",
+          hasPrev,
+          hasNext,
+          prevPage: hasPrev ? page - 1 : null,
+          nextPage: hasNext ? page + 1 : null,
+        },
       });
     } catch (err) {
       console.error("List banners error:", err);
-      res.status(500).json({ message: "Failed to list banners" });
+      return res.status(500).json({ message: "Failed to list banners" });
     }
   };
+
 
   /**
    * GET /api/banners/:id (public)
@@ -117,10 +152,10 @@ export class BannerController {
       if (!banner) {
         return res.status(404).json({ message: "Banner not found" });
       }
-     return res.json(banner);
+      return res.json(banner);
     } catch (err) {
       console.error("Get banner error:", err);
-   return   res.status(500).json({ message: "Failed to fetch banner" });
+      return res.status(500).json({ message: "Failed to fetch banner" });
     }
   };
 
@@ -162,10 +197,10 @@ export class BannerController {
       }
 
       await banner.save();
-     return res.json(banner);
+      return res.json(banner);
     } catch (err) {
       console.error("Update banner error:", err);
-     return res.status(500).json({ message: "Failed to update banner" });
+      return res.status(500).json({ message: "Failed to update banner" });
     }
   };
 
@@ -179,10 +214,10 @@ export class BannerController {
       if (result.deletedCount === 0) {
         return res.status(404).json({ message: "Banner not found" });
       }
-    return  res.json({ message: "Banner deleted successfully" });
+      return res.json({ message: "Banner deleted successfully" });
     } catch (err) {
       console.error("Delete banner error:", err);
-    return  res.status(500).json({ message: "Failed to delete banner" });
+      return res.status(500).json({ message: "Failed to delete banner" });
     }
   };
 }
