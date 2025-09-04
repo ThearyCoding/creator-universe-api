@@ -41,6 +41,8 @@ apis: [
   "./src/product/controllers/**/*.ts",
   "./src/upload/routes/**/*.ts",
   "./src/upload/controllers/**/*.ts",
+  "./src/attribute/controllers/**/*.ts",
+  "./src/attribute/routes/**/*.ts"
 ],
 };
 

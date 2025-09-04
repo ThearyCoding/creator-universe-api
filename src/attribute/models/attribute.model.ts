@@ -5,7 +5,6 @@ export type AttributeType = "text" | "color" | "size" | "number" | "select";
 
 
 export interface IAttributeValue {
-    _id: Schema.Types.ObjectId;
     label: string; // e.g., "Black"
     value?: string; // e.g., hex #000000 or canonical code "black"
     meta?: Record<string, any>; // optional metadata (e.g., swatch)
