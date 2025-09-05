@@ -24,7 +24,7 @@ export const authenticate: RequestHandler = async (req: Request, res: Response, 
 
     if (!token) {
       res.status(401).json({ message: "No token provided" });
-      return; // IMPORTANT: don't "return res.json(...)" (would return Response)
+      return;
     }
 
     const decoded = jwt.verify(token, JWT_SECRET) as DecodedToken;

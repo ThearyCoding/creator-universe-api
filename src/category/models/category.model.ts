@@ -1,3 +1,4 @@
+// models/category.ts
 import { Schema, model, Document } from "mongoose";
 
 export interface ICategory extends Document {
@@ -5,10 +6,15 @@ export interface ICategory extends Document {
   description?: string;
   slug: string;
   isActive: boolean;
-  imageUrl?: string;            
+  imageUrl?: string;
   createdAt: Date;
   updatedAt: Date;
 }
+
+const slugify = (s: string) =>
+  s.toLowerCase().trim()
+    .replace(/[^a-z0-9]+/g, "-")
+    .replace(/(^-|-$)+/g, "");
 
 const categorySchema = new Schema<ICategory>(
   {
@@ -16,13 +22,11 @@ const categorySchema = new Schema<ICategory>(
     description: { type: String, trim: true },
     slug: { type: String, required: true, unique: true, lowercase: true, trim: true },
     isActive: { type: Boolean, default: true },
-    imageUrl: {              
+    imageUrl: {
       type: String,
       trim: true,
       validate: {
-        validator: (v: string) =>
-          !v ||
-          /^https?:\/\/[^\s/$.?#].[^\s]*$/i.test(v), 
+        validator: (v: string) => !v || /^https?:\/\/[^\s/$.?#].[^\s]*$/i.test(v),
         message: "imageUrl must be a valid http(s) URL",
       },
     },
@@ -30,14 +34,11 @@ const categorySchema = new Schema<ICategory>(
   { timestamps: true }
 );
 
-categorySchema.pre<ICategory>("save", function (next) {
-  if (this.isModified("name")) {
-    this.slug = this.name
-      .toLowerCase()
-      .replace(/[^a-z0-9]+/g, "-")
-      .replace(/(^-|-$)+/g, "");
+// Auto-slug
+categorySchema.pre<ICategory>("validate", function (next) {
+  if ((this.isModified("name") || !this.slug) && this.name) {
+    this.slug = slugify(this.name);
   }
   next();
 });
-
 export const Category = model<ICategory>("Category", categorySchema);
