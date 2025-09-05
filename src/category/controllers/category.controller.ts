@@ -182,21 +182,25 @@ export class CategoryController {
 
     async removeBulk(req: Request, res: Response) {
         try {
-            const { idOrSlug } = req.params;
-            const query = idOrSlug.match(/^[a-f\d]{24}$/i)
-                ? { _id: idOrSlug }
-                : { slug: idOrSlug.toLowerCase() };
+            const { ids } = req.body;
 
-            const result = await Category.deleteMany(query);
-            if (result.deletedCount === 0)
-                return res.status(404).json({ message: "Category not found" });
+            if (!ids || !Array.isArray(ids) || ids.length === 0) {
+                return res.status(400).json({ message: "No IDs provided" });
+            }
 
-            return res.json({ message: "Category deleted successfully" });
+            const result = await Category.deleteMany({ _id: { $in: ids } });
+
+            if (result.deletedCount === 0) {
+                return res.status(404).json({ message: "No categories found to delete" });
+            }
+
+            return res.json({ message: `${result.deletedCount} categories deleted successfully` });
         } catch (err) {
             console.error("Delete category error:", err);
             return res.status(500).json({ message: "Failed to delete category" });
         }
-    };
+    }
+
 
 }
 
