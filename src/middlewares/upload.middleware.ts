@@ -16,6 +16,9 @@ export const upload = multer({
   storage: multer.memoryStorage(),
   limits: { fileSize: MAX_FILE_SIZE, files: 10 },
   fileFilter: (_req, file, cb) => {
+    // ✅ THIS IS THE NEW LINE FOR DEBUGGING
+    console.log(`[File Filter] Received file: ${file.originalname}, MIME Type: ${file.mimetype}`);
+
     if (!ALLOWED_MIME.has(file.mimetype)) {
       return cb(new Error("Unsupported file type"));
     }

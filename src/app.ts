@@ -22,6 +22,8 @@ dotenv.config();
 
 // Create Express app
 const app = express();
+app.set('trust proxy', 1);
+
 
 // ========================
 // Database Connection
@@ -40,6 +42,8 @@ const connectDB = async () => {
 // Middleware
 // ========================
 app.use(cors({
+  origin: '*',
+
   methods: ['GET', 'POST', 'PUT', 'DELETE'],
   allowedHeaders: ['Content-Type', 'Authorization']
 }));
@@ -61,7 +65,7 @@ app.use(
 app.get('/', (req, res) => {
   res.json({
     name: 'Creator Universe API',
-    version: '1.0.0',
+    version: '1.0.1-corsfix',
     status: 'OK',
     uptime: process.uptime().toFixed(2) + 's',
     environment: process.env.NODE_ENV || 'development',

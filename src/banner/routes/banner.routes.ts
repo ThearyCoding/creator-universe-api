@@ -131,7 +131,7 @@ router.post("/", authenticate, authorizeRoles("admin"), asyncHandler(async (req,
  * @swagger
  * /api/banners:
  *   get:
- *     summary: List banners (public)
+
  *     tags: [Banners]
  *     parameters:
  *       - in: query
