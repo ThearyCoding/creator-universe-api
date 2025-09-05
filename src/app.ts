@@ -10,11 +10,13 @@ import bannerRoutes from "./banner/routes/banner.routes";
 import authRoutes from './auth/routes/auth.routes';
 import userRoutes from './user/routes/user.routes';
 import productRoutes from "./product/routes/product.routes";
+import attributeRoutes  from "./attribute/routes/admin.attribute.routes";
 import uploadRoutes from "./upload/routes/upload.routes";
 import { apiLimiter } from './middlewares/rateLimit';
 import swaggerJsdoc from 'swagger-jsdoc';
 import swaggerUi from 'swagger-ui-express';
 import swaggerOptions from './docs/swagger.config';
+import { User } from './user/models/user.model';
 // Load environment variables
 dotenv.config();
 
@@ -62,7 +64,6 @@ app.use(
     },
   })
 );
-
 app.get('/', (req, res) => {
   res.json({
     name: 'Creator Universe API',
@@ -84,6 +85,7 @@ app.use("/api/categories", categoryRoutes);
 app.use("/api/banners", bannerRoutes);
 app.use("/api/products", productRoutes);
 app.use("/api/uploads", uploadRoutes);
+app.use("/api/attributes",attributeRoutes);
 
 // Health check endpoint
 app.get('/health', (req, res) => {

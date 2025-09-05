@@ -1,14 +1,12 @@
 import multer from "multer";
 
-const MAX_FILE_SIZE = 10 * 1024 * 1024; // 10MB per file
+const MAX_FILE_SIZE = 10 * 1024 * 1024;
 const ALLOWED_MIME = new Set([
-  // images
   "image/jpeg",
   "image/png",
   "image/webp",
   "image/gif",
   "image/svg+xml",
-  // videos (optional; keep if you plan to support)
   "video/mp4",
   "video/quicktime",
   "video/webm",
