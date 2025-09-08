@@ -214,17 +214,22 @@ export class BannerController {
       if (!ids || !Array.isArray(ids) || ids.length === 0) {
         return res.status(400).json({ message: 'No IDs provided' });
       }
+
       const result = await Banner.deleteMany({ _id: { $in: ids } });
 
       if (result.deletedCount === 0) {
-        return res.status(404).json({ message: "Banner not found to delete" });
+        return res.status(404).json({ message: "No banners found to delete" });
       }
-      return res.json({ message: "Banner deleted successfully" });
+
+      return res.json({
+        message: `${result.deletedCount} banner(s) deleted successfully`
+      });
     } catch (err) {
       console.error("Delete banner error:", err);
       return res.status(500).json({ message: "Failed to delete banner" });
     }
   };
+
 }
 
 export default BannerController;
