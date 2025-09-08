@@ -202,7 +202,7 @@ router.get("/:id", (0, asyncHandler_1.asyncHandler)(async (req, res) => {
 /**
  * @swagger
  * /api/banners/{id}:
- *   patch:
+ *   put:
  *     summary: Update a banner (admin only)
  *     tags: [Banners]
  *     security:
@@ -232,22 +232,22 @@ router.get("/:id", (0, asyncHandler_1.asyncHandler)(async (req, res) => {
  *       404:
  *         description: Not found
  */
-router.patch("/:id", auth_1.authenticate, (0, authorizeRoles_1.authorizeRoles)("admin"), (0, asyncHandler_1.asyncHandler)(async (req, res) => {
+router.put("/:id", auth_1.authenticate, (0, authorizeRoles_1.authorizeRoles)("admin"), (0, asyncHandler_1.asyncHandler)(async (req, res) => {
     await controller.update(req, res);
 }));
 /**
  * @swagger
  * /api/banners/bulk-delete:
- *   delete:
- *     summary: Delete a banner (admin only)
+ *   post:
+ *     summary: Bulk delete banners (admin only)
  *     tags: [Banners]
  *     security:
  *       - bearerAuth: []
- *    requestBody:
+ *     requestBody:
  *       required: true
  *       content:
  *         application/json:
- *       schema:
+ *           schema:
  *             type: object
  *             properties:
  *               ids:
@@ -256,13 +256,15 @@ router.patch("/:id", auth_1.authenticate, (0, authorizeRoles_1.authorizeRoles)("
  *                   type: string
  *     responses:
  *       200:
- *         description: Deleted
+ *         description: Banners deleted successfully
  *       400:
- *         description: Bad request
+ *         description: Bad request (no IDs provided)
  *       401:
  *         description: Unauthorized
  *       403:
- *         description: Not found
+ *         description: Forbidden
+ *       404:
+ *         description: No banners found to delete
  */
 router.post("/bulk-delete", auth_1.authenticate, (0, authorizeRoles_1.authorizeRoles)("admin"), (0, asyncHandler_1.asyncHandler)(async (req, res) => {
     await controller.remove(req, res);
