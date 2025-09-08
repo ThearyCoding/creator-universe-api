@@ -242,7 +242,7 @@ router.patch("/:id", authenticate, authorizeRoles("admin"), asyncHandler(async (
 
 /**
  * @swagger
- * /api/banners/{id}:
+ * /api/banners/bulk-delete:
  *   delete:
  *     summary: Delete a banner (admin only)
  *     tags: [Banners]
@@ -250,6 +250,8 @@ router.patch("/:id", authenticate, authorizeRoles("admin"), asyncHandler(async (
  *       - bearerAuth: []
  *    requestBody:
  *       required: true
+ *       content:
+ *         application/json:
  *       schema:
  *             type: object
  *             properties:
@@ -260,14 +262,14 @@ router.patch("/:id", authenticate, authorizeRoles("admin"), asyncHandler(async (
  *     responses:
  *       200:
  *         description: Deleted
+ *       400:
+ *         description: Bad request
  *       401:
  *         description: Unauthorized
  *       403:
- *         description: Forbidden
- *       404:
  *         description: Not found
  */
-router.delete("/bulk-delete", authenticate, authorizeRoles("admin"), asyncHandler(async (req, res) => {
+router.post("/bulk-delete", authenticate, authorizeRoles("admin"), asyncHandler(async (req, res) => {
   await controller.remove(req, res);
 }));
 
