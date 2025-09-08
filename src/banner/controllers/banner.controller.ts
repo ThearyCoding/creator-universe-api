@@ -211,10 +211,11 @@ export class BannerController {
     try {
       const { ids } = req.body;
 
-      if (!ids || !Array.isArray(ids) || ids.length === 0){
-        return res.status(400).json({message: 'No IDs provided'});
+      if (!ids || !Array.isArray(ids) || ids.length === 0) {
+        return res.status(400).json({ message: 'No IDs provided' });
       }
-      const result = await Banner.deleteOne({ _id: {$in :ids } });
+      const result = await Banner.deleteMany({ _id: { $in: ids } });
+
       if (result.deletedCount === 0) {
         return res.status(404).json({ message: "Banner not found to delete" });
       }
