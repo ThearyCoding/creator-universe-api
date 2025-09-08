@@ -159,10 +159,8 @@ export class BannerController {
     }
   };
 
-  /**
-   * PATCH /api/banners/:id (admin)
-   */
-  update = async (req: Request, res: Response) => {
+  // Admin: Update Banner
+  async update(req: Request, res: Response) {
     try {
       const { id } = req.params;
       const {
@@ -177,18 +175,19 @@ export class BannerController {
         endDate,
       } = req.body;
 
-      const banner = await Banner.findById(id);
+      const banner = await Banner.findOne({ _id: id });
       if (!banner) {
         return res.status(404).json({ message: "Banner not found" });
       }
 
       if (typeof title !== "undefined") banner.title = String(title).trim();
-      if (typeof subtitle !== "undefined") banner.subtitle = String(subtitle);
-      if (typeof description !== "undefined") banner.description = String(description);
+      if (typeof subtitle !== "undefined") banner.subtitle = String(subtitle).trim();
+      if (typeof description !== "undefined") banner.description = String(description).trim();
       if (typeof imageUrl !== "undefined") banner.imageUrl = String(imageUrl).trim();
       if (typeof linkUrl !== "undefined") banner.linkUrl = String(linkUrl).trim();
       if (typeof position !== "undefined") banner.position = Number(position);
       if (typeof isActive !== "undefined") banner.isActive = !!isActive;
+
       if (typeof startDate !== "undefined") {
         banner.startDate = startDate ? new Date(startDate) : undefined;
       }
@@ -198,11 +197,12 @@ export class BannerController {
 
       await banner.save();
       return res.json(banner);
-    } catch (err) {
+    } catch (err: any) {
       console.error("Update banner error:", err);
       return res.status(500).json({ message: "Failed to update banner" });
     }
-  };
+  }
+
 
   /**
    * DELETE /api/banners/:id (admin)

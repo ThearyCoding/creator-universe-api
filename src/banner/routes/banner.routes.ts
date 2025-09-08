@@ -206,7 +206,7 @@ router.get("/:id", asyncHandler(async (req, res) => {
 /**
  * @swagger
  * /api/banners/{id}:
- *   patch:
+ *   put:
  *     summary: Update a banner (admin only)
  *     tags: [Banners]
  *     security:
@@ -236,9 +236,16 @@ router.get("/:id", asyncHandler(async (req, res) => {
  *       404:
  *         description: Not found
  */
-router.patch("/:id", authenticate, authorizeRoles("admin"), asyncHandler(async (req, res) => {
-  await controller.update(req, res);
-}));
+
+router.put(
+  "/:id",
+  authenticate,
+  authorizeRoles("admin"),
+  asyncHandler(async (req, res) => {
+    await controller.update(req, res);
+  })
+);
+
 
 /**
  * @swagger

@@ -142,45 +142,6 @@ class BannerController {
             }
         };
         /**
-         * PATCH /api/banners/:id (admin)
-         */
-        this.update = async (req, res) => {
-            try {
-                const { id } = req.params;
-                const { title, subtitle, description, imageUrl, linkUrl, position, isActive, startDate, endDate, } = req.body;
-                const banner = await banner_model_1.Banner.findById(id);
-                if (!banner) {
-                    return res.status(404).json({ message: "Banner not found" });
-                }
-                if (typeof title !== "undefined")
-                    banner.title = String(title).trim();
-                if (typeof subtitle !== "undefined")
-                    banner.subtitle = String(subtitle);
-                if (typeof description !== "undefined")
-                    banner.description = String(description);
-                if (typeof imageUrl !== "undefined")
-                    banner.imageUrl = String(imageUrl).trim();
-                if (typeof linkUrl !== "undefined")
-                    banner.linkUrl = String(linkUrl).trim();
-                if (typeof position !== "undefined")
-                    banner.position = Number(position);
-                if (typeof isActive !== "undefined")
-                    banner.isActive = !!isActive;
-                if (typeof startDate !== "undefined") {
-                    banner.startDate = startDate ? new Date(startDate) : undefined;
-                }
-                if (typeof endDate !== "undefined") {
-                    banner.endDate = endDate ? new Date(endDate) : undefined;
-                }
-                await banner.save();
-                return res.json(banner);
-            }
-            catch (err) {
-                console.error("Update banner error:", err);
-                return res.status(500).json({ message: "Failed to update banner" });
-            }
-        };
-        /**
          * DELETE /api/banners/:id (admin)
          */
         this.remove = async (req, res) => {
@@ -191,15 +152,54 @@ class BannerController {
                 }
                 const result = await banner_model_1.Banner.deleteMany({ _id: { $in: ids } });
                 if (result.deletedCount === 0) {
-                    return res.status(404).json({ message: "Banner not found to delete" });
+                    return res.status(404).json({ message: "No banners found to delete" });
                 }
-                return res.json({ message: "Banner deleted successfully" });
+                return res.json({
+                    message: `${result.deletedCount} banner(s) deleted successfully`
+                });
             }
             catch (err) {
                 console.error("Delete banner error:", err);
                 return res.status(500).json({ message: "Failed to delete banner" });
             }
         };
+    }
+    // Admin: Update Banner
+    async update(req, res) {
+        try {
+            const { id } = req.params;
+            const { title, subtitle, description, imageUrl, linkUrl, position, isActive, startDate, endDate, } = req.body;
+            const banner = await banner_model_1.Banner.findOne({ _id: id });
+            if (!banner) {
+                return res.status(404).json({ message: "Banner not found" });
+            }
+            if (typeof title !== "undefined")
+                banner.title = String(title).trim();
+            if (typeof subtitle !== "undefined")
+                banner.subtitle = String(subtitle).trim();
+            if (typeof description !== "undefined")
+                banner.description = String(description).trim();
+            if (typeof imageUrl !== "undefined")
+                banner.imageUrl = String(imageUrl).trim();
+            if (typeof linkUrl !== "undefined")
+                banner.linkUrl = String(linkUrl).trim();
+            if (typeof position !== "undefined")
+                banner.position = Number(position);
+            if (typeof isActive !== "undefined")
+                banner.isActive = !!isActive;
+            if (typeof startDate !== "undefined") {
+                banner.startDate = startDate ? new Date(startDate) : undefined;
+            }
+            if (typeof endDate !== "undefined") {
+                banner.endDate = endDate ? new Date(endDate) : undefined;
+            }
+            await banner.save();
+            return res.json(banner);
+        }
+        catch (err) {
+            console.error("Update banner error:", err);
+            return res.status(500).json({ message: "Failed to update banner" });
+        }
     }
 }
 exports.BannerController = BannerController;
