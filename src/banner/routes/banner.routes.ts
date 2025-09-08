@@ -263,7 +263,7 @@ router.patch("/:id", authenticate, authorizeRoles("admin"), asyncHandler(async (
  *       404:
  *         description: Not found
  */
-router.delete("/:id", authenticate, authorizeRoles("admin"), asyncHandler(async (req, res) => {
+router.delete("/bulk-delete", authenticate, authorizeRoles("admin"), asyncHandler(async (req, res) => {
   await controller.remove(req, res);
 }));
 
