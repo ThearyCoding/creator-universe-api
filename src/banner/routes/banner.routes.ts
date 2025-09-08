@@ -248,11 +248,15 @@ router.patch("/:id", authenticate, authorizeRoles("admin"), asyncHandler(async (
  *     tags: [Banners]
  *     security:
  *       - bearerAuth: []
- *     parameters:
- *       - in: path
- *         name: id
- *         required: true
- *         schema: { type: string }
+ *    requestBody:
+ *       required: true
+ *       schema:
+ *             type: object
+ *             properties:
+ *               ids:
+ *                 type: array
+ *                 items:
+ *                   type: string
  *     responses:
  *       200:
  *         description: Deleted
