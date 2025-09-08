@@ -209,10 +209,14 @@ export class BannerController {
    */
   remove = async (req: Request, res: Response) => {
     try {
-      const { id } = req.params;
-      const result = await Banner.deleteOne({ _id: id });
+      const { ids } = req.body;
+
+      if (!ids || !Array.isArray(ids) || ids.length === 0){
+        return res.status(400).json({message: 'No IDs provided'});
+      }
+      const result = await Banner.deleteOne({ _id: {$in :ids } });
       if (result.deletedCount === 0) {
-        return res.status(404).json({ message: "Banner not found" });
+        return res.status(404).json({ message: "Banner not found to delete" });
       }
       return res.json({ message: "Banner deleted successfully" });
     } catch (err) {
