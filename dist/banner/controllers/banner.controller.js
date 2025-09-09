@@ -1,7 +1,12 @@
 "use strict";
+var __importDefault = (this && this.__importDefault) || function (mod) {
+    return (mod && mod.__esModule) ? mod : { "default": mod };
+};
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.BannerController = void 0;
 const banner_model_1 = require("../models/banner.model");
+const mongoose_1 = __importDefault(require("mongoose"));
+const utils_1 = __importDefault(require("../../utils/utils"));
 class BannerController {
     constructor() {
         /**
@@ -141,10 +146,31 @@ class BannerController {
                 return res.status(500).json({ message: "Failed to fetch banner" });
             }
         };
-        /**
-         * DELETE /api/banners/:id (admin)
-         */
-        this.remove = async (req, res) => {
+        this.updateStatus = async (req, res) => {
+            try {
+                const { id } = req.body;
+                if (!mongoose_1.default.isValidObjectId(id)) {
+                    return res.status(400).json({ message: "Invalid banner id" });
+                }
+                const { isActive } = req.body ?? {};
+                if (typeof isActive !== "boolean") {
+                    return res.status(400).json({ message: "isActive must be boolean" });
+                }
+                const updated = await banner_model_1.Banner.findByIdAndUpdate(id, { $set: { isActive } }, { new: true, runValidators: true }).lean();
+                if (!updated) {
+                    return res.status(404).json({ message: "Category not found" });
+                }
+                return res.json(updated);
+            }
+            catch (err) {
+                const dup = (0, utils_1.default)(err);
+                if (dup)
+                    return res.status(409).json({ message: dup });
+                console.error("updateStatus error:", err);
+                return res.status(500).json({ message: "Failed to update status" });
+            }
+        };
+        this.removeBulk = async (req, res) => {
             try {
                 const { ids } = req.body;
                 if (!ids || !Array.isArray(ids) || ids.length === 0) {

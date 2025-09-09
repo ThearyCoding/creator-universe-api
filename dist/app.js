@@ -26,7 +26,6 @@ dotenv_1.default.config();
 // Create Express app
 const app = (0, express_1.default)();
 app.set('trust proxy', 1);
-app.set('trust proxy', 1);
 // ========================
 // Database Connection
 // ========================

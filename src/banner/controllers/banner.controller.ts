@@ -1,7 +1,7 @@
 import { Request, Response } from "express";
 import { Banner } from "../models/banner.model";
 import mongoose from "mongoose";
-import dupKeyMessage from "@/utils/utils";
+import dupKeyMessage from "../../utils/utils";
 
 export class BannerController {
   /**
