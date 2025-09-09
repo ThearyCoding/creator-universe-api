@@ -1,5 +1,7 @@
 import { Request, Response } from "express";
 import { Banner } from "../models/banner.model";
+import mongoose from "mongoose";
+import dupKeyMessage from "@/utils/utils";
 
 export class BannerController {
   /**
@@ -203,11 +205,39 @@ export class BannerController {
     }
   }
 
+  updateStatus = async (req: Request, res: Response) => {
+    try {
+      const { id } = req.body;
 
-  /**
-   * DELETE /api/banners/:id (admin)
-   */
-  remove = async (req: Request, res: Response) => {
+      if (!mongoose.isValidObjectId(id)) {
+        return res.status(400).json({ message: "Invalid banner id" });
+      }
+
+      const { isActive } = req.body ?? {};
+      if (typeof isActive !== "boolean") {
+        return res.status(400).json({ message: "isActive must be boolean" });
+      }
+
+      const updated = await Banner.findByIdAndUpdate(
+        id,
+        { $set: { isActive } },
+        { new: true, runValidators: true }
+      ).lean();
+
+      if (!updated) {
+        return res.status(404).json({ message: "Category not found" });
+      }
+
+      return res.json(updated);
+    } catch (err: any) {
+      const dup = dupKeyMessage(err);
+      if (dup) return res.status(409).json({ message: dup });
+      console.error("updateStatus error:", err);
+      return res.status(500).json({ message: "Failed to update status" });
+    }
+  }
+
+  removeBulk = async (req: Request, res: Response) => {
     try {
       const { ids } = req.body;
 
