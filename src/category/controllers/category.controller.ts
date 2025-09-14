@@ -70,6 +70,7 @@ export class CategoryController {
 
 
     // Public: List
+    // Public: List
     async list(req: Request, res: Response) {
         try {
             const page = Math.max(parseInt(String(req.query.page ?? "1"), 10), 1);
@@ -88,12 +89,7 @@ export class CategoryController {
             // filter
             const filter: Record<string, any> = {};
             if (search) {
-                // use text index when available; fall back to regex
-                filter.$or = [
-                    { $text: { $search: search } },
-                    { name: { $regex: search, $options: "i" } },
-                    { description: { $regex: search, $options: "i" } },
-                ];
+                filter.$text = { $search: search }; // ✅ FIXED
             }
             if (typeof isActiveQ !== "undefined") {
                 const val = String(isActiveQ).toLowerCase();
@@ -133,7 +129,8 @@ export class CategoryController {
             console.error("List categories error:", err);
             res.status(500).json({ message: "Failed to list categories" });
         }
-    };
+    }
+
 
     // Public: Get one
     async getOne(req: Request, res: Response) {
