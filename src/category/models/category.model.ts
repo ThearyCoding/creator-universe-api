@@ -34,11 +34,13 @@ const categorySchema = new Schema<ICategory>(
   { timestamps: true }
 );
 
-// Auto-slug
+categorySchema.index({ name: "text", description: "text" });
+
 categorySchema.pre<ICategory>("validate", function (next) {
   if ((this.isModified("name") || !this.slug) && this.name) {
     this.slug = slugify(this.name);
   }
   next();
 });
+
 export const Category = model<ICategory>("Category", categorySchema);
