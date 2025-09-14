@@ -28,13 +28,13 @@ export class ProductController {
             }
 
             const product = await Product.create(payload);
-        return    res.status(201).json(product);
+            return res.status(201).json(product);
         } catch (err: any) {
             if (err?.code === 11000) {
                 return res.status(409).json({ message: "Duplicate slug or unique field" });
             }
             console.error("Create product error:", err);
-          return  res.status(500).json({ message: "Failed to create product", details: err?.message });
+            return res.status(500).json({ message: "Failed to create product", details: err?.message });
         }
     };
 
@@ -157,29 +157,39 @@ export class ProductController {
                 Product.countDocuments(filter),
             ]);
 
-        return    res.json({ items, page, limit, total, pages: Math.ceil(total / limit) });
+            return res.json({ items, page, limit, total, pages: Math.ceil(total / limit) });
         } catch (err) {
             console.error("List products error:", err);
-           return res.status(500).json({ message: "Failed to list products" });
+            return res.status(500).json({ message: "Failed to list products" });
         }
     };
 
-    // Public: Get by id or slug
     getOne = async (req: Request, res: Response) => {
         try {
             const { idOrSlug } = req.params;
-            const query = idOrSlug.match(/^[a-f\d]{24}$/i)
+            const query = /^[a-f\d]{24}$/i.test(idOrSlug)
                 ? { _id: idOrSlug }
-                : { slug: idOrSlug.toLowerCase() };
+                : { slug: idOrSlug };
 
-            const product = await Product.findOne(query).populate("category", "name slug");
-            if (!product) return res.status(404).json({ message: "Product not found" });
-          return  res.json(product);
+            const product = await Product.findOne({ ...query, isActive: true })
+                .select("name slug price images description category")
+                .populate("category", "name slug");
+
+            if (!product) {
+                return res.status(404).json({
+                    error: { code: "PRODUCT_NOT_FOUND", message: "Product not found" },
+                });
+            }
+
+            return res.json(product);
         } catch (err) {
             console.error("Get product error:", err);
-          return  res.status(500).json({ message: "Failed to fetch product" });
+            return res.status(500).json({
+                error: { code: "SERVER_ERROR", message: "Failed to fetch product" },
+            });
         }
     };
+
 
     // Admin: Update (full/partial; variants array replaces if provided)
     update = async (req: Request, res: Response) => {
@@ -232,13 +242,13 @@ export class ProductController {
             }
 
             await product.save();
-          return  res.json(product);
+            return res.json(product);
         } catch (err: any) {
             if (err?.code === 11000) {
                 return res.status(409).json({ message: "Duplicate slug or unique field" });
             }
             console.error("Update product error:", err);
-          return  res.status(500).json({ message: "Failed to update product", details: err?.message });
+            return res.status(500).json({ message: "Failed to update product", details: err?.message });
         }
     };
 
@@ -252,10 +262,10 @@ export class ProductController {
 
             const result = await Product.deleteOne(query);
             if (result.deletedCount === 0) return res.status(404).json({ message: "Product not found" });
-           return res.json({ message: "Product deleted successfully" });
+            return res.json({ message: "Product deleted successfully" });
         } catch (err) {
             console.error("Delete product error:", err);
-          return  res.status(500).json({ message: "Failed to delete product" });
+            return res.status(500).json({ message: "Failed to delete product" });
         }
     };
 }
