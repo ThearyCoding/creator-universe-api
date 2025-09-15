@@ -131,7 +131,7 @@ router.post("/", authenticate, authorizeRoles("admin"), asyncHandler(async (req,
  * @swagger
  * /api/banners:
  *   get:
- *     summary: List banners (public)
+
  *     tags: [Banners]
  *     parameters:
  *       - in: query
@@ -206,7 +206,7 @@ router.get("/:id", asyncHandler(async (req, res) => {
 /**
  * @swagger
  * /api/banners/{id}:
- *   patch:
+ *   put:
  *     summary: Update a banner (admin only)
  *     tags: [Banners]
  *     security:
@@ -236,36 +236,100 @@ router.get("/:id", asyncHandler(async (req, res) => {
  *       404:
  *         description: Not found
  */
-router.patch("/:id", authenticate, authorizeRoles("admin"), asyncHandler(async (req, res) => {
-  await controller.update(req, res);
-}));
+router.put(
+  "/:id",
+  authenticate,
+  authorizeRoles("admin"),
+  asyncHandler(async (req, res) => {
+    await controller.update(req, res);
+  })
+);
+
 
 /**
  * @swagger
- * /api/banners/{id}:
- *   delete:
- *     summary: Delete a banner (admin only)
+ * /api/banners/bulk-delete:
+ *   post:
+ *     summary: Bulk delete banners (admin only)
  *     tags: [Banners]
  *     security:
  *       - bearerAuth: []
- *     parameters:
- *       - in: path
- *         name: id
- *         required: true
- *         schema: { type: string }
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             properties:
+ *               ids:
+ *                 type: array
+ *                 items:
+ *                   type: string
  *     responses:
  *       200:
- *         description: Deleted
+ *         description: Banners deleted successfully
+ *       400:
+ *         description: Bad request (no IDs provided)
  *       401:
  *         description: Unauthorized
  *       403:
  *         description: Forbidden
  *       404:
- *         description: Not found
+ *         description: No banners found to delete
  */
-router.delete("/:id", authenticate, authorizeRoles("admin"), asyncHandler(async (req, res) => {
-  await controller.remove(req, res);
+router.post("/bulk-delete", authenticate, authorizeRoles("admin"), asyncHandler(async (req, res) => {
+  await controller.removeBulk(req, res);
 }));
+
+/**
+ * @swagger
+ * /api/banners/status:
+ *   post:
+ *     summary: Update banner status (admin only)
+ *     description: Update only the `isActive` status of a banner by its ID.
+ *     tags: [Banners]
+ *     security:
+ *       - bearerAuth: []
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             required:
+ *               - id
+ *               - isActive
+ *             properties:
+ *               id:
+ *                 type: string
+ *                 example: "66d0a0f9f2cba4f9c2b2e111"
+ *               isActive:
+ *                 type: boolean
+ *                 example: true
+ *     responses:
+ *       200:
+ *         description: Banner status updated successfully
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/Banner'
+ *       400:
+ *         description: Invalid request (missing or invalid id/isActive)
+ *       401:
+ *         description: Unauthorized
+ *       403:
+ *         description: Forbidden
+ *       404:
+ *         description: Banner not found
+ */
+router.post(
+  "/status",
+  authenticate,
+  authorizeRoles("admin"),
+  asyncHandler(async (req, res) => {
+    await controller.updateStatus(req, res);
+  })
+);
 
 
 export default router;

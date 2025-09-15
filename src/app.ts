@@ -9,19 +9,21 @@ import categoryRoutes from "./category/routes/category.routes";
 import bannerRoutes from "./banner/routes/banner.routes";
 import authRoutes from './auth/routes/auth.routes';
 import userRoutes from './user/routes/user.routes';
-import productRoutes from "./product/routes/product.routes";
+import mobileProductsRouter from "./product/routes/mobile.products.routes";
+import adminProductsRouter from "./product/routes/admin.products.routes"
 import attributeRoutes  from "./attribute/routes/admin.attribute.routes";
 import uploadRoutes from "./upload/routes/upload.routes";
 import { apiLimiter } from './middlewares/rateLimit';
 import swaggerJsdoc from 'swagger-jsdoc';
 import swaggerUi from 'swagger-ui-express';
 import swaggerOptions from './docs/swagger.config';
-import { User } from './user/models/user.model';
 // Load environment variables
 dotenv.config();
 
 // Create Express app
 const app = express();
+app.set('trust proxy', 1);
+
 
 // ========================
 // Database Connection
@@ -40,6 +42,8 @@ const connectDB = async () => {
 // Middleware
 // ========================
 app.use(cors({
+  origin: '*', 
+
   methods: ['GET', 'POST', 'PUT', 'DELETE'],
   allowedHeaders: ['Content-Type', 'Authorization']
 }));
@@ -61,7 +65,7 @@ app.use(
 app.get('/', (req, res) => {
   res.json({
     name: 'Creator Universe API',
-    version: '1.0.0',
+    version: '1.0.1-corsfix',
     status: 'OK',
     uptime: process.uptime().toFixed(2) + 's',
     environment: process.env.NODE_ENV || 'development',
@@ -77,7 +81,8 @@ app.use('/api/auth', authRoutes);
 app.use('/api/users', userRoutes);
 app.use("/api/categories", categoryRoutes);
 app.use("/api/banners", bannerRoutes);
-app.use("/api/products", productRoutes);
+app.use("/api/mobile/products", mobileProductsRouter);
+app.use("/api/admin/products", adminProductsRouter);
 app.use("/api/uploads", uploadRoutes);
 app.use("/api/attributes",attributeRoutes);
 
@@ -111,3 +116,4 @@ process.on('unhandledRejection', (err: Error) => {
 connectDB();
 
 export default app;
+

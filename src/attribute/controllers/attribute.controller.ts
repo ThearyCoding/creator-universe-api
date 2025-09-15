@@ -162,15 +162,26 @@ export class AttributeController {
   /**
    * DELETE /api/admin/attributes/:idOrCode
    */
-  async remove(req: Request, res: Response) {
+  async removeMany(req: Request, res: Response) {
     try {
-      const { idOrCode } = req.params;
-      const result = await Attribute.deleteOne(toIdOrCodeQuery(idOrCode));
-      if (result.deletedCount === 0) return res.status(404).json({ message: "Attribute not found" });
-      return res.json({ message: "Attribute deleted successfully" });
+      const { ids } = req.body;
+
+      if (!ids || !Array.isArray(ids) || ids.length === 0) {
+        return res.status(400).json({ message: "No IDs provided" });
+      }
+
+      const result = await Attribute.deleteMany({ _id: { $in: ids } });
+
+      if (result.deletedCount === 0) {
+        return res.status(404).json({ message: "No attributes found to delete" });
+      }
+
+      return res.json({
+        message: `${result.deletedCount} attribute(s) deleted successfully`,
+      });
     } catch (err) {
-      console.error("Attribute.remove error:", err);
-      return res.status(500).json({ message: "Failed to delete attribute" });
+      console.error("Attribute.removeMany error:", err);
+      return res.status(500).json({ message: "Failed to delete attributes" });
     }
   }
 
@@ -232,32 +243,43 @@ export class AttributeController {
       return res.status(500).json({ message: "Failed to update value" });
     }
   }
-
   /**
-   * DELETE /api/admin/attributes/:idOrCode/values/:valueId
+   * POST /api/attributes/:idOrCode/values/remove-many
    */
-  async removeValue(req: Request, res: Response) {
+  async removeManyValues(req: Request, res: Response) {
     try {
-      const { idOrCode, valueId } = req.params;
-      if (!mongoose.isValidObjectId(valueId)) {
-        return res.status(400).json({ message: "Invalid valueId" });
+      const { idOrCode } = req.params;
+      const { valueIds } = req.body;
+
+      if (!valueIds || !Array.isArray(valueIds) || valueIds.length === 0) {
+        return res.status(400).json({ message: "No valueIds provided" });
       }
 
       const doc = await Attribute.findOne(toIdOrCodeQuery(idOrCode));
-      if (!doc) return res.status(404).json({ message: "Attribute not found" });
+      if (!doc) {
+        return res.status(404).json({ message: "Attribute not found" });
+      }
 
-      const subIndex = doc.values.findIndex((v: any) => String(v._id) === String(valueId));
-      if (subIndex === -1) return res.status(404).json({ message: "Attribute value not found" });
+      const beforeCount = doc.values.length;
+      doc.values = doc.values.filter((v: any) => !valueIds.includes(String(v._id)));
+      const deletedCount = beforeCount - doc.values.length;
 
-      doc.values.splice(subIndex, 1); // remove the value
+      if (deletedCount === 0) {
+        return res.status(404).json({ message: "No attribute values found to delete" });
+      }
+
       await doc.save();
 
-      return res.json(doc);
+      return res.json({
+        message: `${deletedCount} attribute value(s) deleted successfully`,
+        attribute: doc,
+      });
     } catch (err) {
-      console.error("Attribute.removeValue error:", err);
-      return res.status(500).json({ message: "Failed to remove value" });
+      console.error("Attribute.removeManyValues error:", err);
+      return res.status(500).json({ message: "Failed to remove attribute values" });
     }
   }
+
 
 }
 

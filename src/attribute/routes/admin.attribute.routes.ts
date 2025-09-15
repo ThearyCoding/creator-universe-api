@@ -254,8 +254,8 @@ router.get(
 /**
  * @swagger
  * /api/attributes/{idOrCode}:
- *   patch:
- *     summary: Update attribute (top-level fields)
+ *   put:
+ *     summary: Update an attribute
  *     tags: [Attributes]
  *     security:
  *       - bearerAuth: []
@@ -263,7 +263,8 @@ router.get(
  *       - in: path
  *         name: idOrCode
  *         required: true
- *         schema: { type: string }
+ *         schema:
+ *           type: string
  *     requestBody:
  *       required: true
  *       content:
@@ -288,44 +289,58 @@ router.get(
  *       409:
  *         description: Duplicate code
  */
-router.patch(
+router.put(
   "/:idOrCode",
   asyncHandler(async (req, res) => {
-    await controller.update(req, res);
+    await controller.update(req, res); // ✅ use update
   })
 );
 
+
 /**
  * @swagger
- * /api/attributes/{idOrCode}:
- *   delete:
- *     summary: Delete attribute
+ * /api/attributes/remove-many:
+ *   post:
+ *     summary: Delete multiple attributes
  *     tags: [Attributes]
  *     security:
  *       - bearerAuth: []
- *     parameters:
- *       - in: path
- *         name: idOrCode
- *         required: true
- *         schema: { type: string }
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             properties:
+ *               ids:
+ *                 type: array
+ *                 items:
+ *                   type: string
+ *             example:
+ *               ids: ["64f8c1a123...", "64f8c1b456...", "64f8c1c789..."]
  *     responses:
  *       200:
- *         description: Deleted
+ *         description: Deleted successfully
  *         content:
  *           application/json:
  *             schema:
- *               $ref: '#/components/schemas/MessageResponse'
+ *               type: object
+ *               properties:
+ *                 message:
+ *                   type: string
+ *       400:
+ *         description: Invalid request (no IDs provided)
  *       401:
  *         description: Unauthorized
  *       403:
  *         description: Forbidden
  *       404:
- *         description: Not found
+ *         description: No attributes found to delete
  */
-router.delete(
-  "/:idOrCode",
+router.post(
+  "/remove-many",
   asyncHandler(async (req, res) => {
-    await controller.remove(req, res);
+    await controller.removeMany(req, res);
   })
 );
 
@@ -381,8 +396,8 @@ router.post(
 /**
  * @swagger
  * /api/attributes/{idOrCode}/values/{valueId}:
- *   patch:
- *     summary: Update an attribute value
+ *   put:
+ *     summary: Update a single attribute value
  *     tags: [Attributes]
  *     security:
  *       - bearerAuth: []
@@ -402,14 +417,15 @@ router.post(
  *           schema:
  *             type: object
  *             properties:
- *               label: { type: string, example: "Jet Black" }
- *               value: { type: string, example: "#111111" }
+ *               label:
+ *                 type: string
+ *               value:
+ *                 type: string
  *               meta:
  *                 type: object
- *                 additionalProperties: true
  *     responses:
  *       200:
- *         description: Attribute with updated value
+ *         description: Updated attribute with modified value
  *         content:
  *           application/json:
  *             schema:
@@ -423,18 +439,20 @@ router.post(
  *       404:
  *         description: Attribute or value not found
  */
-router.patch(
+router.put(
   "/:idOrCode/values/:valueId",
   asyncHandler(async (req, res) => {
-    await controller.updateValue(req, res);
+    await controller.updateValue(req, res); 
   })
 );
 
+
+
 /**
  * @swagger
- * /api/attributes/{idOrCode}/values/{valueId}:
- *   delete:
- *     summary: Remove an attribute value
+ * /api/attributes/{idOrCode}/values/remove-many:
+ *   post:
+ *     summary: Remove multiple attribute values
  *     tags: [Attributes]
  *     security:
  *       - bearerAuth: []
@@ -442,18 +460,33 @@ router.patch(
  *       - in: path
  *         name: idOrCode
  *         required: true
- *         schema: { type: string }
- *       - in: path
- *         name: valueId
- *         required: true
- *         schema: { type: string }
+ *         schema:
+ *           type: string
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             properties:
+ *               valueIds:
+ *                 type: array
+ *                 items:
+ *                   type: string
+ *             example:
+ *               valueIds: ["64f8c1a123...", "64f8c1b456...", "64f8c1c789..."]
  *     responses:
  *       200:
  *         description: Attribute after removal
  *         content:
  *           application/json:
  *             schema:
- *               $ref: '#/components/schemas/Attribute'
+ *               type: object
+ *               properties:
+ *                 message:
+ *                   type: string
+ *                 attribute:
+ *                   $ref: '#/components/schemas/Attribute'
  *       400:
  *         description: Validation error
  *       401:
@@ -461,13 +494,14 @@ router.patch(
  *       403:
  *         description: Forbidden
  *       404:
- *         description: Attribute or value not found
+ *         description: Attribute or values not found
  */
-router.delete(
-  "/:idOrCode/values/:valueId",
+router.post(
+  "/:idOrCode/values/remove-many",
   asyncHandler(async (req, res) => {
-    await controller.removeValue(req, res);
+    await controller.removeManyValues(req, res);
   })
 );
+
 
 export default router;

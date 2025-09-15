@@ -1,5 +1,7 @@
 import { Request, Response } from "express";
 import { Banner } from "../models/banner.model";
+import mongoose from "mongoose";
+import dupKeyMessage from "../../utils/utils";
 
 export class BannerController {
   /**
@@ -159,10 +161,8 @@ export class BannerController {
     }
   };
 
-  /**
-   * PATCH /api/banners/:id (admin)
-   */
-  update = async (req: Request, res: Response) => {
+  // Admin: Update Banner
+  async update(req: Request, res: Response) {
     try {
       const { id } = req.params;
       const {
@@ -177,18 +177,19 @@ export class BannerController {
         endDate,
       } = req.body;
 
-      const banner = await Banner.findById(id);
+      const banner = await Banner.findOne({ _id: id });
       if (!banner) {
         return res.status(404).json({ message: "Banner not found" });
       }
 
       if (typeof title !== "undefined") banner.title = String(title).trim();
-      if (typeof subtitle !== "undefined") banner.subtitle = String(subtitle);
-      if (typeof description !== "undefined") banner.description = String(description);
+      if (typeof subtitle !== "undefined") banner.subtitle = String(subtitle).trim();
+      if (typeof description !== "undefined") banner.description = String(description).trim();
       if (typeof imageUrl !== "undefined") banner.imageUrl = String(imageUrl).trim();
       if (typeof linkUrl !== "undefined") banner.linkUrl = String(linkUrl).trim();
       if (typeof position !== "undefined") banner.position = Number(position);
       if (typeof isActive !== "undefined") banner.isActive = !!isActive;
+
       if (typeof startDate !== "undefined") {
         banner.startDate = startDate ? new Date(startDate) : undefined;
       }
@@ -198,28 +199,67 @@ export class BannerController {
 
       await banner.save();
       return res.json(banner);
-    } catch (err) {
+    } catch (err: any) {
       console.error("Update banner error:", err);
       return res.status(500).json({ message: "Failed to update banner" });
     }
-  };
+  }
 
-  /**
-   * DELETE /api/banners/:id (admin)
-   */
-  remove = async (req: Request, res: Response) => {
+  updateStatus = async (req: Request, res: Response) => {
     try {
-      const { id } = req.params;
-      const result = await Banner.deleteOne({ _id: id });
-      if (result.deletedCount === 0) {
-        return res.status(404).json({ message: "Banner not found" });
+      const { id } = req.body;
+
+      if (!mongoose.isValidObjectId(id)) {
+        return res.status(400).json({ message: "Invalid banner id" });
       }
-      return res.json({ message: "Banner deleted successfully" });
+
+      const { isActive } = req.body ?? {};
+      if (typeof isActive !== "boolean") {
+        return res.status(400).json({ message: "isActive must be boolean" });
+      }
+
+      const updated = await Banner.findByIdAndUpdate(
+        id,
+        { $set: { isActive } },
+        { new: true, runValidators: true }
+      ).lean();
+
+      if (!updated) {
+        return res.status(404).json({ message: "Category not found" });
+      }
+
+      return res.json(updated);
+    } catch (err: any) {
+      const dup = dupKeyMessage(err);
+      if (dup) return res.status(409).json({ message: dup });
+      console.error("updateStatus error:", err);
+      return res.status(500).json({ message: "Failed to update status" });
+    }
+  }
+
+  removeBulk = async (req: Request, res: Response) => {
+    try {
+      const { ids } = req.body;
+
+      if (!ids || !Array.isArray(ids) || ids.length === 0) {
+        return res.status(400).json({ message: 'No IDs provided' });
+      }
+
+      const result = await Banner.deleteMany({ _id: { $in: ids } });
+
+      if (result.deletedCount === 0) {
+        return res.status(404).json({ message: "No banners found to delete" });
+      }
+
+      return res.json({
+        message: `${result.deletedCount} banner(s) deleted successfully`
+      });
     } catch (err) {
       console.error("Delete banner error:", err);
       return res.status(500).json({ message: "Failed to delete banner" });
     }
   };
+
 }
 
 export default BannerController;

@@ -185,30 +185,42 @@ router.put("/:id", authenticate, authorizeRoles("admin"), asyncHandler(async (re
 
 /**
  * @swagger
- * /api/categories/{idOrSlug}:
- *   delete:
- *     summary: Delete a category (admin only)
+ * /api/categories/bulk-delete:
+ *   post:
+ *     summary: Bulk delete categories (admin only)
  *     tags: [Categories]
  *     security:
  *       - bearerAuth: []
- *     parameters:
- *       - in: path
- *         name: idOrSlug
- *         required: true
- *         schema: { type: string }
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             properties:
+ *               ids:
+ *                 type: array
+ *                 items:
+ *                   type: string
  *     responses:
  *       200:
  *         description: Deleted
+ *       400:
+ *         description: Bad request
  *       401:
  *         description: Unauthorized
  *       403:
  *         description: Forbidden
- *       404:
- *         description: Not found
  */
-router.delete("/:idOrSlug", authenticate, authorizeRoles("admin"), asyncHandler(async (req, res) => {
-    await controller.remove(req, res);
-}));
+router.post(
+  "/bulk-delete",
+  authenticate,
+  authorizeRoles("admin"),
+  asyncHandler(async (req, res) => {
+    await controller.removeBulk(req, res);
+  })
+);
+
 
 
 
