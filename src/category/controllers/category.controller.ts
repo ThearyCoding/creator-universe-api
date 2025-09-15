@@ -1,15 +1,7 @@
 import { Request, Response } from "express";
 import { Category } from "../models/category.model";
 import mongoose from "mongoose";
-
-// Helper to extract duplicate key error message from MongoDB errors
-function dupKeyMessage(err: any): string | null {
-    if (err?.code === 11000 && err?.keyValue) {
-        const keys = Object.keys(err.keyValue);
-        return `Duplicate value for: ${keys.join(", ")}`;
-    }
-    return null;
-}
+import dupKeyMessage from "../../utils/utils";
 
 export class CategoryController {
     // Admin: Create
@@ -69,71 +61,66 @@ export class CategoryController {
     };
 
 
-    // Public: List
-    async list(req: Request, res: Response) {
-        try {
-            const page = Math.max(parseInt(String(req.query.page ?? "1"), 10), 1);
-            const limit = Math.min(Math.max(parseInt(String(req.query.limit ?? "10"), 10), 1), 100);
-            const search = String(req.query.search ?? "").trim();
-            const isActiveQ = req.query.isActive;
+// Public: List
+async list(req: Request, res: Response) {
+    try {
+        const page = Math.max(parseInt(String(req.query.page ?? "1"), 10), 1);
+        const limit = Math.min(Math.max(parseInt(String(req.query.limit ?? "10"), 10), 1), 100);
+        const search = String(req.query.search ?? "").trim();
+        const isActiveQ = req.query.isActive;
 
-            // sorting
-            const SAFE_SORT_FIELDS = new Set(["createdAt", "name", "isActive", "description", "imageUrl"]);
-            const sortByRaw = String(req.query.sortBy ?? "createdAt");
-            const sortBy = SAFE_SORT_FIELDS.has(sortByRaw) ? sortByRaw : "createdAt";
-            const orderRaw = String(req.query.order ?? "desc").toLowerCase();
-            const order = orderRaw === "asc" ? 1 : -1;
-            const sort: Record<string, 1 | -1> = { [sortBy]: order as 1 | -1 };
+        // sorting
+        const SAFE_SORT_FIELDS = new Set(["createdAt", "name", "isActive", "description", "imageUrl"]);
+        const sortByRaw = String(req.query.sortBy ?? "createdAt");
+        const sortBy = SAFE_SORT_FIELDS.has(sortByRaw) ? sortByRaw : "createdAt";
+        const orderRaw = String(req.query.order ?? "desc").toLowerCase();
+        const order = orderRaw === "asc" ? 1 : -1;
+        const sort: Record<string, 1 | -1> = { [sortBy]: order as 1 | -1 };
 
-            // filter
-            const filter: Record<string, any> = {};
-            if (search) {
-                // use text index when available; fall back to regex
-                filter.$or = [
-                    { $text: { $search: search } },
-                    { name: { $regex: search, $options: "i" } },
-                    { description: { $regex: search, $options: "i" } },
-                ];
-            }
-            if (typeof isActiveQ !== "undefined") {
-                const val = String(isActiveQ).toLowerCase();
-                if (val === "true") filter.isActive = true;
-                else if (val === "false") filter.isActive = false;
-            }
-
-            const [items, total] = await Promise.all([
-                Category.find(filter)
-                    .sort(sort)
-                    .skip((page - 1) * limit)
-                    .limit(limit)
-                    .lean(),
-                Category.countDocuments(filter),
-            ]);
-
-            const pages = Math.max(Math.ceil(total / limit), 1);
-            const hasPrev = page > 1;
-            const hasNext = page < pages;
-
-            res.json({
-                items,
-                meta: {
-                    page,
-                    limit,
-                    total,
-                    pages,
-                    sortBy,
-                    order: order === 1 ? "asc" : "desc",
-                    hasPrev,
-                    hasNext,
-                    prevPage: hasPrev ? page - 1 : null,
-                    nextPage: hasNext ? page + 1 : null,
-                },
-            });
-        } catch (err) {
-            console.error("List categories error:", err);
-            res.status(500).json({ message: "Failed to list categories" });
+        // filter
+        const filter: Record<string, any> = {};
+        if (search) {
+            filter.$text = { $search: search }; 
         }
-    };
+        if (typeof isActiveQ !== "undefined") {
+            const val = String(isActiveQ).toLowerCase();
+            if (val === "true") filter.isActive = true;
+            else if (val === "false") filter.isActive = false;
+        }
+
+        const [items, total] = await Promise.all([
+            Category.find(filter)
+                .sort(sort)
+                .skip((page - 1) * limit)
+                .limit(limit)
+                .lean(),
+            Category.countDocuments(filter),
+        ]);
+
+        const pages = Math.max(Math.ceil(total / limit), 1);
+        const hasPrev = page > 1;
+        const hasNext = page < pages;
+
+        res.json({
+            items,
+            meta: {
+                page,
+                limit,
+                total,
+                pages,
+                sortBy,
+                order: order === 1 ? "asc" : "desc",
+                hasPrev,
+                hasNext,
+                prevPage: hasPrev ? page - 1 : null,
+                nextPage: hasNext ? page + 1 : null,
+            },
+        });
+    } catch (err) {
+        console.error("List categories error:", err);
+        res.status(500).json({ message: "Failed to list categories" });
+    }
+}
 
     // Public: Get one
     async getOne(req: Request, res: Response) {
